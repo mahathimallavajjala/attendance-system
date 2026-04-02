@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 50%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        input, button { padding: 6px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Attendance System</h1>
+
+    <h2>Add Attendance</h2>
+    <form id="attendanceForm">
+        <label>Student Name: <input type="text" id="studentName" required></label><br>
+        <label>Present: 
+            <select id="present">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
+        </label><br>
+        <button type="submit">Add Attendance</button>
+    </form>
+
+    <h2>Attendance Records</h2>
+    <table id="attendanceTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Student Name</th>
+                <th>Present</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        const tableBody = document.querySelector("#attendanceTable tbody");
+
+        // Function to fetch all attendance records
+        function loadAttendance() {
+            fetch('/attendance')
+                .then(response => response.json())
+                .then(data => {
+                    tableBody.innerHTML = "";
+                    data.forEach(item => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.studentName}</td>
+                            <td>${item.present ? "Yes" : "No"}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+
+        // Handle form submission to add attendance
+        document.getElementById("attendanceForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const studentName = document.getElementById("studentName").value;
+            const present = document.getElementById("present").value === "true";
+
+            fetch('/attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentName, present })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("attendanceForm").reset();
+                loadAttendance();
+            });
+        });
+
+        // Load records on page load
+        loadAttendance();
+    </script>
+</body>
+</html>
